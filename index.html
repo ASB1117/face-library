@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>School Library System / സ്കൂൾ ലൈബ്രറി / نظام إدارة مكتبة المدرسة</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background: #f5f5f5; }
+    header { background: #ffffff; color: #000000; padding: 10px 20px; text-align: center; }
+    header h1 { margin: 0; font-size: 20px; }
+    header .sub { font-size: 12px; margin-top: 4px; opacity: 0.9; }
+    .container { max-width: 1100px; margin: 20px auto; background: #fff;
+                 padding: 15px 20px 30px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+                 border-radius: 6px; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tab-btn { flex: 1; min-width: 150px; padding: 10px; border: none; cursor: pointer;
+               background: #ecf0f1; border-radius: 4px; font-weight: bold; font-size: 13px; }
+    .tab-btn.active { background: #3498db; color: white; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    label { display: block; margin: 5px 0 3px; font-size: 14px; }
+    input[type="text"], input[type="number"], input[type="date"], input[type="password"], select {
+      width: 100%; padding: 6px 8px; margin-bottom: 10px; box-sizing: border-box;
+      border-radius: 4px; border: 1px solid #ccc; font-size: 14px;
+    }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .col-3 { flex: 1 1 30%; min-width: 220px; }
+    button { padding: 8px 14px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; }
+    .btn-primary { background: #3498db; color: white; }
+    .btn-danger { background: #e74c3c; color: white; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
+    th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: left; vertical-align: top; }
+    th { background: #f0f0f0; }
+    .small { font-size: 12px; color: #555; }
+    .message { margin-top: 5px; font-size: 13px; color: green; }
+    .error { color: red; }
+    .badge { display: inline-block; padding: 2px 6px; font-size: 11px; border-radius: 3px;
+             background: #3498db; color: #fff; }
+    .top-info { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+                font-size: 13px; margin-bottom: 8px; }
+    hr { border: none; border-top: 1px solid #eee; }
+    .btn-print { margin-top: 8px; }
+    .see-more-btn { margin-top: 6px; font-size: 12px; padding: 5px 10px; }
+  </style>
+</head>
+<body>
+  <header><img src="logo_new.png" style="height:90px; margin-bottom:10px;" />
+    <h1>
+      School Library Management System /
+      സ്കൂൾ ലൈബ്രറി മാനേജ്മെന്റ് സിസ്റ്റം /
+      نظام إدارة مكتبة المدرسة
+    </h1>
+    <div class="sub">
+      Search &amp; Manage Books • പുസ്തകങ്ങൾ തിരയുക &amp; ക്രമീകരിക്കുക • بحث عن الكتب وإدارتها
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="searchTab">🔎 Search Books / തിരയുക / بحث</button>
+      <button class="tab-btn" data-tab="adminTab">🛠 Admin / അഡ്മിൻ / مشرف</button>
+    </div>
+
+    <div id="searchTab" class="tab-content active">
+      <div class="top-info">
+        <div>Total Books: <span id="totalCount" class="badge">0</span></div>
+        <div>Showing: <span id="shownCount" class="badge">0</span></div>
+      </div>
+
+      <div class="row">
+        <div class="col-3">
+          <label for="searchText">Search (Title / Author / Book No / Category)</label>
+          <input type="text" id="searchText" placeholder="Type any word..." />
+        </div>
+        <div class="col-3">
+          <label for="categoryFilter">Category</label>
+          <select id="categoryFilter">
+            <option value="">All</option>
+          </select>
+        </div>
+        <div class="col-3">
+          <label>&nbsp;</label>
+          <button class="btn-primary" id="clearFilters">Clear Filters</button>
+        </div>
+      </div>
+
+      <table id="booksTable">
+        <thead>
+          <tr>
+            <th>SL</th>
+            <th>Book ID</th>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Category</th>
+            <th>Source</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div id="adminTab" class="tab-content">
+      <h2>Admin / അഡ്മിൻ</h2>
+
+      <div id="loginSection">
+        <label for="adminPassword">Admin Password</label>
+        <input type="password" id="adminPassword" placeholder="••••••••" />
+        <button class="btn-primary" id="loginBtn">Login</button>
+        <div id="loginMsg" class="message error"></div>
+      </div>
+
+      <div id="adminSection" style="display:none; margin-top:20px;">
+        <h3>📘 Issue Book / പുസ്തകം നൽകുക</h3>
+        <p class="small">
+          Type only <strong>Book ID</strong> and <strong>Student ID</strong>. Book Title and Student Name will fill automatically.
+        </p>
+        <div class="row">
+          <div class="col-3">
+            <label for="issueBookNo">Book ID</label>
+            <input type="text" id="issueBookNo" placeholder="e.g. N-1/750" />
+            <div class="small">After typing, press <strong>Tab</strong> or click outside to auto-fill book title.</div>
+          </div>
+          <div class="col-3">
+            <label for="issueBookTitle">Book Title (auto)</label>
+            <input type="text" id="issueBookTitle" placeholder="Auto from Book ID" readonly />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-3">
+            <label for="studentId">Student ID (Library Code)</label>
+            <input type="text" id="studentId" placeholder="e.g. B7" />
+            <div class="small">After typing, press <strong>Tab</strong> or click outside to auto-fill name.</div>
+          </div>
+          <div class="col-3">
+            <label for="studentName">Student Name (auto)</label>
+            <input type="text" id="studentName" placeholder="Auto from Student ID" readonly />
+          </div>
+          <div class="col-3">
+            <label for="classSection">Class &amp; Division</label>
+            <input type="text" id="classSection" placeholder="e.g. 7A, 8B" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-3">
+            <label for="issueDate">Issue Date</label>
+            <input type="date" id="issueDate" />
+          </div>
+          <div class="col-3">
+            <label for="dueDate">Due Date (3 weeks)</label>
+            <input type="date" id="dueDate" />
+          </div>
+        </div>
+
+        <button class="btn-primary" id="issueBookBtn">Issue Book</button>
+        <div id="issueMsg" class="message"></div>
+
+        <hr style="margin:25px 0;">
+
+        <h3>📥 Import Book Excel (.xlsx)</h3>
+        <p class="small">
+          Excel must have Book ID &amp; Book Name columns (BOOK NO / BOOK ID / ID, and BOOK NAME / TITLE / BOOK).
+        </p>
+        <div class="row">
+          <div class="col-3"><input type="file" id="excelFile" accept=".xlsx,.xls" /></div>
+          <div class="col-3"><button class="btn-primary" id="importExcelBtn">Import Books Excel</button></div>
+        </div>
+        <div id="importMsg" class="message"></div>
+
+        <hr style="margin:25px 0;">
+
+        <h3>📥 Import Student IDs Excel (.xlsx)</h3>
+        <p class="small">
+          Use your <strong>ID.xlsx</strong> here.<br>
+          <strong>Column A</strong> = Library Code (B7, B8, B9...)<br>
+          <strong>Column B</strong> = Student Name.<br>
+          Header row (ID / NAME) is OK — system will skip it.
+        </p>
+        <div class="row">
+          <div class="col-3"><input type="file" id="studentExcelFile" accept=".xlsx,.xls" /></div>
+          <div class="col-3"><button class="btn-primary" id="importStudentsBtn">Import Student IDs</button></div>
+        </div>
+        <div id="studentImportMsg" class="message"></div>
+
+        <hr style="margin:25px 0;">
+
+        <h3>Manually Add New Book</h3>
+        <div class="row">
+          <div class="col-3">
+            <label for="adminBookNo">Book ID</label>
+            <input type="text" id="adminBookNo" placeholder="e.g. N-1/750" />
+          </div>
+          <div class="col-3">
+            <label for="adminTitle">Title</label>
+            <input type="text" id="adminTitle" placeholder="Book title" />
+          </div>
+          <div class="col-3">
+            <label for="adminAuthor">Author</label>
+            <input type="text" id="adminAuthor" placeholder="Author name" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-3">
+            <label for="adminCategory">Category</label>
+            <input type="text" id="adminCategory" placeholder="e.g. Novel, Story..." />
+          </div>
+        </div>
+        <button class="btn-primary" id="addBookBtn">Add Book</button>
+        <div id="adminMsg" class="message"></div>
+
+        <hr style="margin:25px 0;">
+
+        <h3>Locally Added / Imported Books</h3>
+        <table id="extraTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Book ID</th>
+              <th>Title</th>
+              <th>Author</th>
+              <th>Category</th>
+              <th>Delete</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <button class="btn-primary see-more-btn" id="extraSeeMoreBtn" style="display:none;">See more…</button>
+
+        <hr style="margin:25px 0;">
+
+        <h3>Issue / Return Records (Search by Student ID or Name)</h3>
+        <div class="row">
+          <div class="col-3"><input type="text" id="issueSearch" placeholder="Student ID or Name..." /></div>
+        </div>
+        <button class="btn-primary btn-print" id="printOverdueBtn">🖨 Print Overdue Report</button>
+        <table id="issueTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Student ID</th>
+              <th>Name</th>
+              <th>Class</th>
+              <th>Book ID</th>
+              <th>Title</th>
+              <th>Issue Date</th>
+              <th>Due Date</th>
+              <th>Status</th>
+              <th>Return</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <button class="btn-primary see-more-btn" id="issueSeeMoreBtn" style="display:none;">See more…</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="books.js"></script>
+
+  <script>
+    const ADMIN_PASSWORD = "FWLSLIB123";
+    const LOCAL_KEY = "library_extra_books_v1";
+    const ISSUE_KEY = "library_issues_v1";
+    const STUDENTS_KEY = "library_students_v1";
+
+    let extraBooks = [];
+    let allBooks = [];
+    let issues = [];
+    let students = [];
+    let extraExpanded = false;
+    let issuesExpanded = false;
+
+    function todayStr() {
+      const d = new Date();
+      return d.toISOString().slice(0, 10);
+    }
+    function addDays(dateStr, days) {
+      const d = new Date(dateStr);
+      d.setDate(d.getDate() + days);
+      return d.toISOString().slice(0, 10);
+    }
+
+    function loadExtraBooks() {
+      try { extraBooks = JSON.parse(localStorage.getItem(LOCAL_KEY)) || []; }
+      catch(e) { extraBooks = []; }
+    }
+    function saveExtraBooks() { localStorage.setItem(LOCAL_KEY, JSON.stringify(extraBooks)); }
+
+    function loadIssues() {
+      try { issues = JSON.parse(localStorage.getItem(ISSUE_KEY)) || []; }
+      catch(e) { issues = []; }
+    }
+    function saveIssues() { localStorage.setItem(ISSUE_KEY, JSON.stringify(issues)); }
+
+    function loadStudents() {
+      try { students = JSON.parse(localStorage.getItem(STUDENTS_KEY)) || []; }
+      catch(e) { students = []; }
+    }
+    function saveStudents() { localStorage.setItem(STUDENTS_KEY, JSON.stringify(students)); }
+
+    function combineBooks() {
+      const baseWithType = (window.baseBooks || []).map(b => ({
+        serialNo: b.serialNo || "",
+        bookNo: b.bookNo || "",
+        title: b.title || "",
+        author: b.author || "",
+        category: b.category || "",
+        _type: "BASE"
+      }));
+      const extraWithType = extraBooks.map(b => ({ ...b, _type: "EXTRA" }));
+      allBooks = baseWithType.concat(extraWithType);
+    }
+
+    function renderCategoryOptions() {
+      const select = document.getElementById("categoryFilter");
+      while (select.options.length > 1) select.remove(1);
+      const categories = new Set();
+      allBooks.forEach(b => {
+        if (b.category && String(b.category).trim() !== "") {
+          categories.add(String(b.category).trim());
+        }
+      });
+      Array.from(categories).sort().forEach(cat => {
+        const opt = document.createElement("option");
+        opt.value = cat; opt.textContent = cat; select.appendChild(opt);
+      });
+    }
+
+    function renderBooksTable() {
+      const tbody = document.querySelector("#booksTable tbody");
+      tbody.innerHTML = "";
+      const searchText = document.getElementById("searchText").value.trim().toLowerCase();
+      const catFilter = document.getElementById("categoryFilter").value;
+      let filtered = allBooks;
+      if (searchText) {
+        filtered = filtered.filter(b => {
+          const fields = [b.title||"", b.author||"", b.bookNo||"", b.category||""]
+            .map(x => String(x).toLowerCase());
+          return fields.some(f => f.includes(searchText));
+        });
+      }
+      if (catFilter) {
+        filtered = filtered.filter(b => String(b.category).trim() === catFilter);
+      }
+      document.getElementById("totalCount").textContent = allBooks.length;
+      document.getElementById("shownCount").textContent = filtered.length;
+      filtered.forEach((b, idx) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${idx + 1}</td>
+          <td>${b.bookNo || ""}</td>
+          <td>${b.title || ""}</td>
+          <td>${b.author || ""}</td>
+          <td>${b.category || ""}</td>
+          <td class="small">${b._type === "EXTRA" ? "Added" : "Base Excel"}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderExtraTable() {
+      const tbody = document.querySelector("#extraTable tbody");
+      const seeBtn = document.getElementById("extraSeeMoreBtn");
+      tbody.innerHTML = "";
+      let rows = extraBooks;
+      if (!extraExpanded && rows.length > 5) {
+        rows = rows.slice(0, 5);
+        seeBtn.style.display = "inline-block";
+        seeBtn.textContent = "See more…";
+      } else if (extraExpanded && extraBooks.length > 5) {
+        seeBtn.style.display = "inline-block";
+        seeBtn.textContent = "See less";
+      } else {
+        seeBtn.style.display = "none";
+      }
+      rows.forEach((b, index) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${b.bookNo || ""}</td>
+          <td>${b.title || ""}</td>
+          <td>${b.author || ""}</td>
+          <td>${b.category || ""}</td>
+          <td><button class="btn-danger" data-index="${index}">Delete</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+      tbody.querySelectorAll(".btn-danger").forEach(btn => {
+        btn.addEventListener("click", function() {
+          const idx = parseInt(this.getAttribute("data-index"), 10);
+          if (!isNaN(idx)) {
+            const realIndex = extraExpanded ? idx : idx; // same slice order
+            extraBooks.splice(realIndex, 1);
+            saveExtraBooks();
+            combineBooks();
+            renderBooksTable();
+            renderExtraTable();
+          }
+        });
+      });
+    }
+
+    function renderIssuesTable() {
+      const tbody = document.querySelector("#issueTable tbody");
+      const seeBtn = document.getElementById("issueSeeMoreBtn");
+      tbody.innerHTML = "";
+      const searchText = document.getElementById("issueSearch").value.trim().toLowerCase();
+      let filtered = issues;
+      if (searchText) {
+        filtered = issues.filter(it => {
+          const fields = [it.studentId||"", it.studentName||""]
+            .map(x => String(x).toLowerCase());
+          return fields.some(f => f.includes(searchText));
+        });
+      }
+
+      const today = todayStr();
+      let rows = filtered;
+      if (!issuesExpanded && rows.length > 5) {
+        rows = rows.slice(0, 5);
+        seeBtn.style.display = "inline-block";
+        seeBtn.textContent = "See more…";
+      } else if (issuesExpanded && filtered.length > 5) {
+        seeBtn.style.display = "inline-block";
+        seeBtn.textContent = "See less";
+      } else {
+        seeBtn.style.display = "none";
+      }
+
+      rows.forEach((it, idx) => {
+        const isOverdue = it.status === "Issued" && it.dueDate && (new Date(it.dueDate) < new Date(today));
+        const btnClass = isOverdue ? "btn-danger" : "btn-primary";
+        const returnBtnHtml = it.status === "Issued"
+          ? "<button class='" + btnClass + " btn-return' data-id='" + it.id + "'>Return</button>"
+          : "-";
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${idx + 1}</td>
+          <td>${it.studentId || ""}</td>
+          <td>${it.studentName || ""}</td>
+          <td>${it.classSection || ""}</td>
+          <td>${it.bookNo || ""}</td>
+          <td>${it.title || ""}</td>
+          <td>${it.issueDate || ""}</td>
+          <td>${it.dueDate || ""}</td>
+          <td>${it.status || ""}${it.returnDate ? "<br><span class='small'>Returned: " + it.returnDate + "</span>" : ""}</td>
+          <td>${returnBtnHtml}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+      tbody.querySelectorAll(".btn-return").forEach(btn => {
+        btn.addEventListener("click", function() {
+          const id = this.getAttribute("data-id");
+          const idx = issues.findIndex(i => String(i.id) === String(id));
+          if (idx !== -1) {
+            issues[idx].status = "Returned";
+            issues[idx].returnDate = todayStr();
+            saveIssues();
+            renderIssuesTable();
+          }
+        });
+      });
+    }
+
+    function printOverdueReport() {
+      const today = todayStr();
+      const overdue = issues.filter(it =>
+        it.status === "Issued" &&
+        it.dueDate &&
+        (new Date(it.dueDate) < new Date(today))
+      );
+
+      const win = window.open("", "_blank");
+      if (!win) return;
+
+      let html = "<html><head><title>Overdue Books Report</title>";
+      html += "<style>";
+      html += "body{font-family:Arial,sans-serif;font-size:13px;margin:20px;}";
+      html += "h2{text-align:center;margin-bottom:5px;}";
+      html += "p{margin:4px 0;}";
+      html += "table{width:100%;border-collapse:collapse;margin-top:10px;}";
+      html += "th,td{border:1px solid #333;padding:5px;text-align:left;font-size:12px;}";
+      html += "th{background:#eee;}";
+      html += "</style></head><body>";
+      html += "<h2>Overdue Books Report</h2>";
+      html += "<p><strong>Date:</strong> " + today + "</p>";
+      html += "<p><strong>Total Overdue:</strong> " + overdue.length + "</p>";
+
+      if (overdue.length === 0) {
+        html += "<p>No overdue books.</p>";
+      } else {
+        html += "<table><thead><tr>";
+        html += "<th>#</th><th>Student ID</th><th>Name</th><th>Class</th><th>Book ID</th><th>Title</th><th>Issue Date</th><th>Due Date</th></tr></thead><tbody>";
+        overdue.forEach((it, idx) => {
+          html += "<tr>";
+          html += "<td>" + (idx + 1) + "</td>";
+          html += "<td>" + (it.studentId || "") + "</td>";
+          html += "<td>" + (it.studentName || "") + "</td>";
+          html += "<td>" + (it.classSection || "") + "</td>";
+          html += "<td>" + (it.bookNo || "") + "</td>";
+          html += "<td>" + (it.title || "") + "</td>";
+          html += "<td>" + (it.issueDate || "") + "</td>";
+          html += "<td>" + (it.dueDate || "") + "</td>";
+          html += "</tr>";
+        });
+        html += "</tbody></table>";
+      }
+
+      html += "</body></html>";
+
+      win.document.open();
+      win.document.write(html);
+      win.document.close();
+      win.focus();
+      win.print();
+    }
+
+    function setupAdmin() {
+      const loginBtn = document.getElementById("loginBtn");
+      const loginMsg = document.getElementById("loginMsg");
+      const adminSection = document.getElementById("adminSection");
+      const loginSection = document.getElementById("loginSection");
+      loginBtn.addEventListener("click", () => {
+        const pwd = document.getElementById("adminPassword").value;
+        if (pwd === ADMIN_PASSWORD) {
+          loginMsg.textContent = "";
+          loginSection.style.display = "none";
+          adminSection.style.display = "block";
+        } else {
+          loginMsg.textContent = "Wrong password!";
+        }
+      });
+
+      document.getElementById("addBookBtn").addEventListener("click", () => {
+        const bookNo = document.getElementById("adminBookNo").value.trim();
+        const title = document.getElementById("adminTitle").value.trim();
+        const author = document.getElementById("adminAuthor").value.trim();
+        const category = document.getElementById("adminCategory").value.trim();
+        const msg = document.getElementById("adminMsg");
+        if (!bookNo || !title) {
+          msg.textContent = "Book ID and Title are required.";
+          msg.classList.add("error");
+          return;
+        }
+        extraBooks.push({ serialNo:"", bookNo, title, author, category });
+        saveExtraBooks();
+        combineBooks();
+        renderBooksTable();
+        renderExtraTable();
+        document.getElementById("adminBookNo").value = "";
+        document.getElementById("adminTitle").value = "";
+        document.getElementById("adminAuthor").value = "";
+        document.getElementById("adminCategory").value = "";
+        msg.textContent = "Book added successfully!";
+        msg.classList.remove("error");
+      });
+
+      const printBtn = document.getElementById("printOverdueBtn");
+      if (printBtn) {
+        printBtn.addEventListener("click", printOverdueReport);
+      }
+
+      const extraSee = document.getElementById("extraSeeMoreBtn");
+      extraSee.addEventListener("click", () => {
+        extraExpanded = !extraExpanded;
+        renderExtraTable();
+      });
+
+      const issueSee = document.getElementById("issueSeeMoreBtn");
+      issueSee.addEventListener("click", () => {
+        issuesExpanded = !issuesExpanded;
+        renderIssuesTable();
+      });
+    }
+
+    function setupBookIdAutoFill() {
+      const idInput = document.getElementById("issueBookNo");
+      const titleInput = document.getElementById("issueBookTitle");
+      if (!idInput || !titleInput) return;
+
+      function fillFromId() {
+        const val = idInput.value.trim().toLowerCase();
+        if (!val || !allBooks || !allBooks.length) {
+          titleInput.value = "";
+          return;
+        }
+        const found = allBooks.find(b => String(b.bookNo || "").trim().toLowerCase() === val);
+        if (found) {
+          titleInput.value = found.title || "";
+        } else {
+          titleInput.value = "";
+        }
+      }
+
+      idInput.addEventListener("blur", fillFromId);
+    }
+
+    function setupStudentAutoFillForIssue() {
+      const idInput = document.getElementById("studentId");
+      const nameInput = document.getElementById("studentName");
+      if (!idInput || !nameInput) return;
+
+      function fillFromStudentId() {
+        const val = idInput.value.trim().toLowerCase();
+        if (!val || !students || !students.length) {
+          nameInput.value = "";
+          return;
+        }
+        const found = students.find(s => String(s.id || "").trim().toLowerCase() === val);
+        if (found) {
+          nameInput.value = found.name || "";
+        } else {
+          nameInput.value = "";
+        }
+      }
+
+      idInput.addEventListener("blur", fillFromStudentId);
+    }
+
+    function setupIssueHandler() {
+      const issueBtn = document.getElementById("issueBookBtn");
+      const msg = document.getElementById("issueMsg");
+      if (!issueBtn || !msg) return;
+      issueBtn.addEventListener("click", () => {
+        msg.textContent = "";
+        msg.classList.remove("error");
+        msg.style.color = "green";
+
+        const bookNo = document.getElementById("issueBookNo").value.trim();
+        const bookTitle = document.getElementById("issueBookTitle").value.trim();
+        const studentId = document.getElementById("studentId").value.trim();
+        const studentName = document.getElementById("studentName").value.trim();
+        const classSection = document.getElementById("classSection").value.trim();
+        let issueDate = document.getElementById("issueDate").value;
+        let dueDate = document.getElementById("dueDate").value;
+
+        if (!bookNo) {
+          msg.textContent = "❌ Please type Book ID.";
+          msg.classList.add("error");
+          msg.style.color = "red";
+          return;
+        }
+        if (!bookTitle) {
+          msg.textContent = "❌ Book Title not found. Check Book ID and press Tab/click outside.";
+          msg.classList.add("error");
+          msg.style.color = "red";
+          return;
+        }
+        if (!studentId) {
+          msg.textContent = "❌ Please type Student ID.";
+          msg.classList.add("error");
+          msg.style.color = "red";
+          return;
+        }
+        if (!studentName) {
+          msg.textContent = "❌ Student Name not found. Check Student ID and press Tab/click outside. Also import ID.xlsx in Admin.";
+          msg.classList.add("error");
+          msg.style.color = "red";
+          return;
+        }
+
+        if (!issueDate) issueDate = todayStr();
+        if (!dueDate)  dueDate  = addDays(issueDate, 21);
+
+        issues.push({
+          id: Date.now(),
+          bookNo,
+          title: bookTitle,
+          studentId,
+          studentName,
+          classSection,
+          issueDate,
+          dueDate,
+          status: "Issued",
+          returnDate: ""
+        });
+        saveIssues();
+        renderIssuesTable();
+
+        document.getElementById("issueBookNo").value = "";
+        document.getElementById("issueBookTitle").value = "";
+        document.getElementById("studentId").value = "";
+        document.getElementById("studentName").value = "";
+        document.getElementById("classSection").value = "";
+        document.getElementById("issueDate").value = todayStr();
+        document.getElementById("dueDate").value = addDays(todayStr(), 21);
+
+        msg.textContent = "✅ Book issued successfully!";
+        msg.style.color = "green";
+      });
+    }
+
+    function setupExcelImport() {
+      const btn = document.getElementById("importExcelBtn");
+      const fileInput = document.getElementById("excelFile");
+      const msg = document.getElementById("importMsg");
+      btn.addEventListener("click", () => {
+        msg.textContent = "";
+        msg.classList.remove("error");
+        const file = fileInput.files[0];
+        if (!file) {
+          msg.textContent = "Please choose an Excel file first.";
+          msg.classList.add("error");
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: "array" });
+            const firstSheetName = workbook.SheetNames[0];
+            const sheet = workbook.Sheets[firstSheetName];
+            const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+            if (!rows || rows.length < 2) {
+              msg.textContent = "Excel seems empty or has no data rows.";
+              msg.classList.add("error");
+              return;
+            }
+            const header = rows[0].map(h => String(h || "").trim().toUpperCase());
+            const idCandidates = ["BOOK NO", "BOOK ID", "ID"];
+            const titleCandidates = ["BOOK NAME", "TITLE", "BOOK"];
+            let idIndex = -1, titleIndex = -1;
+            header.forEach((h, i) => {
+              if (idIndex === -1 && idCandidates.includes(h)) idIndex = i;
+              if (titleIndex === -1 && titleCandidates.includes(h)) titleIndex = i;
+            });
+            if (idIndex === -1 || titleIndex === -1) {
+              msg.textContent = "Could not find Book ID and Book Name columns.";
+              msg.classList.add("error");
+              return;
+            }
+            let importedCount = 0;
+            for (let r = 1; r < rows.length; r++) {
+              const row = rows[r];
+              const idVal = row[idIndex];
+              const titleVal = row[titleIndex];
+              if (!idVal || !titleVal) continue;
+              extraBooks.push({
+                serialNo:"",
+                bookNo: String(idVal).trim(),
+                title: String(titleVal).trim(),
+                author:"",
+                category:""
+              });
+              importedCount++;
+            }
+            saveExtraBooks();
+            combineBooks();
+            renderBooksTable();
+            renderExtraTable();
+            msg.textContent = "Imported " + importedCount + " books from Excel.";
+          } catch(err) {
+            console.error(err);
+            msg.textContent = "Error reading Excel file.";
+            msg.classList.add("error");
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    function setupStudentImport() {
+      const btn = document.getElementById("importStudentsBtn");
+      const fileInput = document.getElementById("studentExcelFile");
+      const msg = document.getElementById("studentImportMsg");
+      btn.addEventListener("click", () => {
+        msg.textContent = "";
+        msg.classList.remove("error");
+        const file = fileInput.files[0];
+        if (!file) {
+          msg.textContent = "Please choose student ID Excel file first.";
+          msg.classList.add("error");
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: "array" });
+            const firstSheetName = workbook.SheetNames[0];
+            const sheet = workbook.Sheets[firstSheetName];
+            const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+            if (!rows || rows.length === 0) {
+              msg.textContent = "Excel seems empty.";
+              msg.classList.add("error");
+              return;
+            }
+
+            const newStudents = [];
+            for (let r = 0; r < rows.length; r++) {
+              const row = rows[r];
+              const idVal = row[0];
+              const nameVal = row[1];
+              if (!idVal || !nameVal) continue;
+
+              const idStr = String(idVal).trim();
+              const nameStr = String(nameVal).trim();
+              const upperId = idStr.toUpperCase();
+              const upperName = nameStr.toUpperCase();
+
+              if (
+                upperId === "ID" ||
+                upperId === "STUDENT ID" ||
+                upperName === "NAME" ||
+                upperName === "STUDENT NAME"
+              ) {
+                continue;
+              }
+
+              newStudents.push({ id: idStr, name: nameStr });
+            }
+
+            students = newStudents;
+            saveStudents();
+            msg.textContent = "Imported " + students.length + " student IDs (A = code, B = name).";
+          } catch(err) {
+            console.error(err);
+            msg.textContent = "Error reading student Excel file.";
+            msg.classList.add("error");
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      });
+    }
+
+    function setupTabs() {
+      const buttons = document.querySelectorAll(".tab-btn");
+      const tabs = document.querySelectorAll(".tab-content");
+      buttons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          buttons.forEach(b => b.classList.remove("active"));
+          tabs.forEach(t => t.classList.remove("active"));
+          btn.classList.add("active");
+          document.getElementById(btn.getAttribute("data-tab")).classList.add("active");
+        });
+      });
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      setupTabs();
+      setupAdmin();
+      setupIssueHandler();
+      setupExcelImport();
+      setupStudentImport();
+      loadExtraBooks();
+      loadIssues();
+      loadStudents();
+      combineBooks();
+      renderCategoryOptions();
+      renderBooksTable();
+      renderExtraTable();
+      renderIssuesTable();
+      const today = todayStr();
+      const due = addDays(today, 21);
+      const issueDateInput = document.getElementById("issueDate");
+      const dueDateInput = document.getElementById("dueDate");
+      if (issueDateInput) issueDateInput.value = today;
+      if (dueDateInput) dueDateInput.value = due;
+      document.getElementById("searchText").addEventListener("input", renderBooksTable);
+      document.getElementById("categoryFilter").addEventListener("change", renderBooksTable);
+      document.getElementById("clearFilters").addEventListener("click", () => {
+        document.getElementById("searchText").value = "";
+        document.getElementById("categoryFilter").value = "";
+        renderBooksTable();
+      });
+      document.getElementById("issueSearch").addEventListener("input", renderIssuesTable);
+      setupBookIdAutoFill();
+      setupStudentAutoFillForIssue();
+    });
+  </script>
+</body>
+</html>

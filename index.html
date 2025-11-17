@@ -1032,4 +1032,191 @@
 
         // Export Functions
         function setupExportHandlers() {
-            document.getElementById("exportAllBooksBtn").addEventListener
+            document.getElementById("exportAllBooksBtn").addEventListener("click", exportAllBooks);
+            document.getElementById("exportIssuesBtn").addEventListener("click", exportIssueRecords);
+        }
+
+        function exportAllBooks() {
+            if (allBooks.length === 0) {
+                alert("No book data to export.");
+                return;
+            }
+            const data = allBooks.map(b => ({
+                'Book ID': b.bookNo,
+                'Title': b.title,
+                'Author': b.author,
+                'Category': b.category,
+                'Source': b._type
+            }));
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "AllBooks");
+            XLSX.writeFile(wb, "Library_All_Books_Export_" + todayStr() + ".xlsx");
+        }
+
+        function exportIssueRecords() {
+            if (issues.length === 0) {
+                alert("No issue records to export.");
+                return;
+            }
+            const data = issues.map(i => ({
+                'Transaction ID': i.id,
+                'Student ID': i.studentId,
+                'Student Name': i.studentName,
+                'Class/Section': i.classSection,
+                'Book ID': i.bookNo,
+                'Title': i.title,
+                'Issue Date': i.issueDate,
+                'Due Date': i.dueDate,
+                'Status': i.status,
+                'Return Date': i.returnDate || ''
+            }));
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "IssueRecords");
+            XLSX.writeFile(wb, "Library_Issue_Records_Export_" + todayStr() + ".xlsx");
+        }
+
+        // Print Overdue Report
+        function printOverdueReport() {
+            const today = todayStr();
+            const overdue = issues.filter(it =>
+                it.status === "Issued" &&
+                it.dueDate &&
+                (new Date(it.dueDate) < new Date(today))
+            );
+
+            const win = window.open("", "_blank");
+            if (!win) return;
+
+            let html = "<html><head><title>Overdue Books Report</title>";
+            html += "<style>";
+            html += "body{font-family:Arial,sans-serif;font-size:13px;margin:20px;}";
+            html += "h2{text-align:center;margin-bottom:5px; color: var(--secondary-color);}";
+            html += "p{margin:4px 0;}";
+            html += "table{width:100%;border-collapse:collapse;margin-top:10px;}";
+            html += "th,td{border:1px solid #333;padding:5px;text-align:left;font-size:12px;}";
+            html += "th{background:#f0f0f0;}";
+            html += "</style></head><body>";
+            html += "<h2>Overdue Books Report</h2>";
+            html += "<p><strong>Date:</strong> " + today + "</p>";
+            html += "<p><strong>Total Overdue:</strong> " + overdue.length + "</p>";
+
+            if (overdue.length === 0) {
+                html += "<p>No overdue books.</p>";
+            } else {
+                html += "<table><thead><tr>";
+                html += "<th>#</th><th>Student ID</th><th>Name</th><th>Class</th><th>Book ID</th><th>Title</th><th>Issue Date</th><th>Due Date</th></tr></thead><tbody>";
+                overdue.forEach((it, idx) => {
+                    html += "<tr>";
+                    html += "<td>" + (idx + 1) + "</td>";
+                    html += "<td>" + (it.studentId || "") + "</td>";
+                    html += "<td>" + (it.studentName || "") + "</td>";
+                    html += "<td>" + (it.classSection || "") + "</td>";
+                    html += "<td>" + (it.bookNo || "") + "</td>";
+                    html += "<td>" + (it.title || "") + "</td>";
+                    html += "<td>" + (it.issueDate || "") + "</td>";
+                    html += "<td>" + (it.dueDate || "") + "</td>";
+                    html += "</tr>";
+                });
+                html += "</tbody></table>";
+            }
+
+            html += "</body></html>";
+
+            win.document.open();
+            win.document.write(html);
+            win.document.close();
+            win.focus();
+            win.print();
+        }
+
+        function setupTabs() {
+            const buttons = document.querySelectorAll(".tab-btn");
+            const tabs = document.querySelectorAll(".tab-content");
+            buttons.forEach(btn => {
+                btn.addEventListener("click", () => {
+                    buttons.forEach(b => b.classList.remove("active"));
+                    tabs.forEach(t => t.classList.remove("active"));
+                    btn.classList.add("active");
+                    const targetTab = document.getElementById(btn.getAttribute("data-tab"));
+                    targetTab.classList.add("active");
+                    
+                    // Check admin status on tab switch
+                    const isAdminLoggedIn = document.getElementById("adminSection").style.display !== 'none';
+                    if (btn.getAttribute("data-tab") === "reportsTab") {
+                        if (isAdminLoggedIn) {
+                            document.getElementById("reportLoginSection").style.display = "none";
+                            document.getElementById("reportSection").style.display = "block";
+                        } else {
+                            document.getElementById("reportLoginSection").style.display = "block";
+                            document.getElementById("reportSection").style.display = "none";
+                        }
+                    }
+                });
+            });
+        }
+
+        // Modal close handler
+        function setupModalHandler() {
+            const modal = document.getElementById("bookDetailModal");
+            const closeBtn = document.querySelector(".close-btn");
+            
+            closeBtn.addEventListener("click", () => {
+                modal.style.display = "none";
+            });
+            window.addEventListener("click", (event) => {
+                if (event.target === modal) {
+                    modal.style.display = "none";
+                }
+            });
+        }
+
+
+        // Initialization
+        window.addEventListener("DOMContentLoaded", () => {
+            setupTabs();
+            setupAdmin();
+            setupIssueHandler();
+            setupExcelImport();
+            setupStudentImport();
+            setupExportHandlers(); 
+            setupModalHandler(); 
+            
+            loadExtraBooks();
+            loadIssues();
+            loadStudents();
+            combineBooks();
+            
+            renderBooksTable();
+            renderExtraTable();
+            renderIssuesTable();
+            
+            // Initial Date setup for Issue tab
+            const today = todayStr();
+            const due = addDays(today, 21);
+            const issueDateInput = document.getElementById("issueDate");
+            const dueDateInput = document.getElementById("dueDate");
+            if (issueDateInput) issueDateInput.value = today;
+            if (dueDateInput) dueDateInput.value = due;
+            
+            // Event listeners for filtering
+            document.getElementById("searchText").addEventListener("input", renderBooksTable);
+            document.getElementById("categoryFilter").addEventListener("change", renderBooksTable);
+            document.getElementById("clearFilters").addEventListener("click", () => {
+                document.getElementById("searchText").value = "";
+                document.getElementById("categoryFilter").value = "";
+                renderBooksTable();
+            });
+            document.getElementById("issueSearch").addEventListener("input", renderIssuesTable);
+            
+            // Auto-fill setup
+            setupBookIdAutoFill();
+            setupStudentAutoFillForIssue();
+            
+            // Print button setup
+            document.getElementById("printOverdueBtn").addEventListener("click", printOverdueReport);
+        });
+    </script>
+</body>
+</html>

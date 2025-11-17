@@ -4,33 +4,66 @@
     <meta charset="UTF-8" />
     <title>School Library Management System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    
     <style>
+        /* New Theme: Dark Teal/Blue and Orange Accent, inspired by faceschool.in */
         :root {
-            --primary-color: #4CAF50; /* Light Green */
-            --primary-hover: #45a049;
+            --primary-color: #FF9800; /* Orange Accent for Buttons/Active State */
+            --primary-hover: #F57C00;
+            --secondary-color: #2C3E50; /* Dark Teal/Blue for Header/Main Elements */
+            --secondary-hover: #34495E;
             --background-color: #f5f5f5;
             --container-bg: #fff;
-            --header-bg: #e8f5e9; /* Lighter green for header */
+            --header-bg: var(--secondary-color); 
+            --header-text: white;
             --text-color: #333;
             --border-color: #ddd;
             --danger-color: #e74c3c;
         }
+        
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: var(--background-color); color: var(--text-color); }
-        header { background: var(--header-bg); color: var(--text-color); padding: 15px 20px; text-align: center; border-bottom: 2px solid var(--primary-color); }
-        header h1 { margin: 0; font-size: 24px; font-weight: 600; }
-        .container { max-width: 1200px; margin: 25px auto; background: var(--container-bg);
-                     padding: 20px 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-                     border-radius: 8px; }
-        .tabs { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
-        .tab-btn { flex: 1; min-width: 180px; padding: 12px 15px; border: none; cursor: pointer;
-                    background: #f0f0f0; border-radius: 6px; font-weight: bold; font-size: 14px;
-                    transition: background-color 0.3s, color 0.3s; }
+        
+        header { 
+            background: var(--header-bg); 
+            color: var(--header-text); 
+            padding: 20px 30px; 
+            text-align: center; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        header h1 { margin: 0; font-size: 26px; font-weight: 600; }
+        header .sub { font-size: 14px; margin-top: 5px; opacity: 0.8; }
+        
+        .container { 
+            max-width: 1200px; 
+            margin: 25px auto; 
+            background: var(--container-bg);
+            padding: 20px 30px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-radius: 8px; 
+        }
+        
+        .tabs { display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; border-bottom: 2px solid #f0f0f0; }
+        
+        .tab-btn { 
+            flex: 1; min-width: 180px; padding: 12px 15px; border: none; cursor: pointer;
+            background: #f8f8f8; border-radius: 6px 6px 0 0; font-weight: bold; font-size: 14px;
+            transition: background-color 0.3s, color 0.3s; 
+            color: var(--secondary-color);
+            margin-bottom: -2px; /* Pulls button slightly down over the border */
+        }
         .tab-btn:hover:not(.active) { background: #e0e0e0; }
-        .tab-btn.active { background: var(--primary-color); color: white; }
+        .tab-btn.active { 
+            background: var(--secondary-color); 
+            color: white; 
+            border-bottom: 2px solid var(--primary-color);
+        }
+        
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        h2, h3 { color: var(--primary-color); border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 20px; }
+        
+        h2, h3 { color: var(--secondary-color); border-bottom: 1px solid #eee; padding-bottom: 5px; margin-top: 20px; }
         label { display: block; margin: 8px 0 4px; font-size: 14px; font-weight: 500; }
+        
         input[type="text"], input[type="number"], input[type="date"], input[type="password"], select, input[type="file"] {
             width: 100%; padding: 8px 10px; margin-bottom: 15px; box-sizing: border-box;
             border-radius: 4px; border: 1px solid var(--border-color); font-size: 14px;
@@ -41,43 +74,41 @@
         }
         .row { display: flex; gap: 20px; flex-wrap: wrap; }
         .col-3 { flex: 1 1 30%; min-width: 250px; }
-        button { padding: 10px 18px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;
-                  transition: background-color 0.3s; }
+        
+        button { 
+            padding: 10px 18px; border: none; border-radius: 4px; cursor: pointer; 
+            font-size: 14px; font-weight: 600;
+            transition: background-color 0.3s; 
+        }
         .btn-primary { background: var(--primary-color); color: white; }
         .btn-primary:hover { background: var(--primary-hover); }
         .btn-danger { background: var(--danger-color); color: white; }
         .btn-danger:hover { background: #c0392b; }
+        
         table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
         th, td { border: 1px solid var(--border-color); padding: 8px 10px; text-align: left; vertical-align: middle; }
         th { background: #f0f0f0; }
         .small { font-size: 12px; color: #777; }
-        .message { margin-top: 10px; padding: 10px; border-radius: 4px; font-size: 14px; background: #e8f5e9; color: var(--primary-color); }
+        
+        .message { margin-top: 10px; padding: 10px; border-radius: 4px; font-size: 14px; background: #E8F6FA; color: var(--secondary-color); }
         .error { background: #ffe0e0; color: var(--danger-color); }
-        .badge { display: inline-block; padding: 4px 8px; font-size: 12px; border-radius: 12px;
-                 background: var(--primary-color); color: #fff; font-weight: bold; }
+        
+        .badge { 
+            display: inline-block; padding: 4px 8px; font-size: 12px; border-radius: 12px;
+            background: var(--primary-color); color: #fff; font-weight: bold; 
+        }
         .top-info { display: flex; justify-content: flex-start; flex-wrap: wrap; gap: 20px;
                     font-size: 14px; margin-bottom: 15px; }
-        hr { border: none; border-top: 1px solid var(--border-color); margin: 25px 0; }
-        .btn-print { margin-top: 10px; }
+        hr { border: none; border-top: 1px solid #eee; margin: 25px 0; }
         .see-more-btn { margin-top: 10px; font-size: 13px; padding: 8px 15px; }
 
-        /* Modal Styles for Book Details */
-        .modal {
-            display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%;
-            overflow: auto; background-color: rgba(0,0,0,0.4);
-        }
-        .modal-content {
-            background-color: #fefefe; margin: 10% auto; padding: 20px; border: 1px solid #888;
-            width: 80%; max-width: 600px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-        .close-btn {
-            color: #aaa; float: right; font-size: 28px; font-weight: bold;
-        }
-        .close-btn:hover, .close-btn:focus {
-            color: #000; text-decoration: none; cursor: pointer;
-        }
+        /* Modal Styles */
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); }
+        .modal-content { background-color: #fefefe; margin: 10% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 600px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
+        .close-btn:hover, .close-btn:focus { color: #000; text-decoration: none; cursor: pointer; }
         .book-detail-table { width: 100%; margin-top: 15px; }
-        .book-detail-table td:first-child { width: 30%; font-weight: bold; }
+        .book-detail-table td:first-child { width: 30%; font-weight: bold; color: var(--secondary-color); }
         .book-detail-table td { padding: 8px 0; border-bottom: 1px dotted #ccc; }
     </style>
 </head>
@@ -127,7 +158,8 @@
                         <th>Author</th>
                         <th>Category</th>
                         <th>Source</th>
-                        <th>Details</th> </tr>
+                        <th>Details</th>
+                    </tr>
                 </thead>
                 <tbody></tbody>
             </table>
@@ -331,6 +363,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    
     <script>
         window.baseBooks = [
             { serialNo: "1", bookNo: "N-1/001", title: "The Little Prince", author: "Antoine de Saint-Exupéry", category: "Novel" },
@@ -366,11 +399,11 @@
             d.setDate(d.getDate() + days);
             return d.toISOString().slice(0, 10);
         }
-        function generateReceipt(issueItem) { // New Feature: Receipt Generation
+        function generateReceipt(issueItem) {
             const win = window.open("", "_blank");
             if (!win) return;
             let html = "<html><head><title>Book Issue/Return Receipt</title>";
-            html += "<style>body{font-family:Arial,sans-serif;font-size:14px;margin:30px;} h2,h3{text-align:center;} table{width:100%;border-collapse:collapse;} td{padding:8px;border:1px solid #ddd;}</style>";
+            html += "<style>body{font-family:Arial,sans-serif;font-size:14px;margin:30px;} h2,h3{text-align:center; color: var(--secondary-color);} table{width:100%;border-collapse:collapse;} td{padding:8px;border:1px solid #ddd;}</style>";
             html += "</head><body>";
             html += "<h2>School Library</h2>";
             html += "<h3>Book " + (issueItem.status === "Returned" ? "Return" : "Issue") + " Receipt</h3>";
@@ -514,7 +547,9 @@
             
             rows.forEach((b, index) => {
                 const tr = document.createElement("tr");
-                const realIndex = extraExpanded ? extraBooks.findIndex(item => item.bookNo === b.bookNo) : index;
+                // Find the real index for deletion, even when viewing a sliced list
+                const realIndex = extraBooks.findIndex(item => item.bookNo === b.bookNo && item.title === b.title);
+                
                 tr.innerHTML = `
                     <td>${index + 1}</td>
                     <td>${b.bookNo || ""}</td>
@@ -580,10 +615,10 @@
                 if (it.status === "Issued") {
                     returnBtnHtml = `
                         <button class='${btnClass} btn-return' data-id='${it.id}'><span class="icon">🔙</span> Return</button>
-                        <button class='btn-primary btn-print-receipt' data-id='${it.id}'><span class="icon">🖨</span> Print</button>
+                        <button class='btn-primary btn-print-receipt' data-id='${it.id}'>🖨</button>
                     `;
                 } else if (it.status === "Returned") {
-                    returnBtnHtml = `<button class='btn-primary btn-print-receipt' data-id='${it.id}'><span class="icon">🖨</span> Print Receipt</button>`;
+                    returnBtnHtml = `<button class='btn-primary btn-print-receipt' data-id='${it.id}'>🖨 Print Receipt</button>`;
                 }
 
                 const tr = document.createElement("tr");
@@ -612,7 +647,7 @@
                         issues[idx].returnDate = todayStr();
                         saveIssues();
                         renderIssuesTable();
-                        generateReceipt(issues[idx]); // Print return receipt (New Feature)
+                        generateReceipt(issues[idx]); 
                     }
                 });
             });
@@ -629,7 +664,7 @@
             });
         }
         
-        // New Feature: Book Details Modal
+        // Book Details Modal
         function showBookDetails(bookId) {
             const book = allBooks.find(b => String(b.bookNo).trim().toLowerCase() === String(bookId).trim().toLowerCase());
             const modal = document.getElementById("bookDetailModal");
@@ -645,7 +680,7 @@
                 
                 const bookHistory = issues
                     .filter(it => String(it.bookNo).trim().toLowerCase() === String(bookId).trim().toLowerCase())
-                    .sort((a, b) => b.id - a.id); // Sort by latest first
+                    .sort((a, b) => b.id - a.id); 
 
                 if (bookHistory.length === 0) {
                     historyBody.innerHTML = '<tr><td colspan="5">No issue history found for this book.</td></tr>';
@@ -671,7 +706,6 @@
 
         // Setup Functions
         function setupAdmin() {
-            // ... (Login/Logout/Add Book functions remain largely the same, just removing non-English text) ...
             const loginBtn = document.getElementById("loginBtn");
             const loginMsg = document.getElementById("loginMsg");
             const adminSection = document.getElementById("adminSection");
@@ -805,7 +839,7 @@
                     msg.classList.add("error"); msg.style.color = "red"; return;
                 }
                 
-                // Check if book is already issued (New Feature)
+                // Check if book is already issued
                 const isIssued = issues.some(i => String(i.bookNo).trim().toLowerCase() === bookNo.toLowerCase() && i.status === "Issued");
                 if (isIssued) {
                      msg.textContent = "❌ This book is currently issued to another student. It must be returned first.";
@@ -852,18 +886,17 @@
 
                 msg.textContent = "✅ Book issued successfully! Printing receipt...";
                 msg.style.color = "green";
-                generateReceipt(newIssue); // Print issue receipt (New Feature)
+                generateReceipt(newIssue); 
             });
         }
 
-        // Excel Import Handlers (Book and Student)
+        // Excel Import Handlers
         function setupExcelImport() {
             const btn = document.getElementById("importExcelBtn");
             const fileInput = document.getElementById("excelFile");
             const msg = document.getElementById("importMsg");
             
             btn.addEventListener("click", () => {
-                // ... (Book Excel Import logic - remains the same) ...
                 msg.textContent = "";
                 msg.classList.remove("error");
                 const file = fileInput.files[0];
@@ -905,7 +938,7 @@
                             const titleVal = row[titleIndex];
                             if (!idVal || !titleVal) continue;
                             
-                            // Check for duplicate on import (New Feature)
+                            // Check for duplicate on import
                             const bookNo = String(idVal).trim();
                             const isDuplicate = allBooks.some(b => String(b.bookNo).trim().toLowerCase() === bookNo.toLowerCase());
                             if (isDuplicate) continue; 
@@ -938,7 +971,6 @@
             const studentFileInput = document.getElementById("studentExcelFile");
             const studentMsg = document.getElementById("studentImportMsg");
             studentBtn.addEventListener("click", () => {
-                // ... (Student ID Excel Import logic - remains the same) ...
                 studentMsg.textContent = "";
                 studentMsg.classList.remove("error");
                 const file = studentFileInput.files[0];
@@ -998,194 +1030,6 @@
             }
         )}
 
-        // New Feature: Export Functions
+        // Export Functions
         function setupExportHandlers() {
-            document.getElementById("exportAllBooksBtn").addEventListener("click", exportAllBooks);
-            document.getElementById("exportIssuesBtn").addEventListener("click", exportIssueRecords);
-        }
-
-        function exportAllBooks() {
-            if (allBooks.length === 0) {
-                alert("No book data to export.");
-                return;
-            }
-            const data = allBooks.map(b => ({
-                'Book ID': b.bookNo,
-                'Title': b.title,
-                'Author': b.author,
-                'Category': b.category,
-                'Source': b._type
-            }));
-            const ws = XLSX.utils.json_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "AllBooks");
-            XLSX.writeFile(wb, "Library_All_Books_Export_" + todayStr() + ".xlsx");
-        }
-
-        function exportIssueRecords() {
-            if (issues.length === 0) {
-                alert("No issue records to export.");
-                return;
-            }
-            const data = issues.map(i => ({
-                'Transaction ID': i.id,
-                'Student ID': i.studentId,
-                'Student Name': i.studentName,
-                'Class/Section': i.classSection,
-                'Book ID': i.bookNo,
-                'Title': i.title,
-                'Issue Date': i.issueDate,
-                'Due Date': i.dueDate,
-                'Status': i.status,
-                'Return Date': i.returnDate || ''
-            }));
-            const ws = XLSX.utils.json_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "IssueRecords");
-            XLSX.writeFile(wb, "Library_Issue_Records_Export_" + todayStr() + ".xlsx");
-        }
-
-        // Print Overdue Report (Existing logic, now a separate function)
-        function printOverdueReport() {
-            const today = todayStr();
-            const overdue = issues.filter(it =>
-                it.status === "Issued" &&
-                it.dueDate &&
-                (new Date(it.dueDate) < new Date(today))
-            );
-
-            // ... (HTML generation for print window - remains the same) ...
-             const win = window.open("", "_blank");
-            if (!win) return;
-
-            let html = "<html><head><title>Overdue Books Report</title>";
-            html += "<style>";
-            html += "body{font-family:Arial,sans-serif;font-size:13px;margin:20px;}";
-            html += "h2{text-align:center;margin-bottom:5px;}";
-            html += "p{margin:4px 0;}";
-            html += "table{width:100%;border-collapse:collapse;margin-top:10px;}";
-            html += "th,td{border:1px solid #333;padding:5px;text-align:left;font-size:12px;}";
-            html += "th{background:#eee;}";
-            html += "</style></head><body>";
-            html += "<h2>Overdue Books Report</h2>";
-            html += "<p><strong>Date:</strong> " + today + "</p>";
-            html += "<p><strong>Total Overdue:</strong> " + overdue.length + "</p>";
-
-            if (overdue.length === 0) {
-                html += "<p>No overdue books.</p>";
-            } else {
-                html += "<table><thead><tr>";
-                html += "<th>#</th><th>Student ID</th><th>Name</th><th>Class</th><th>Book ID</th><th>Title</th><th>Issue Date</th><th>Due Date</th></tr></thead><tbody>";
-                overdue.forEach((it, idx) => {
-                    html += "<tr>";
-                    html += "<td>" + (idx + 1) + "</td>";
-                    html += "<td>" + (it.studentId || "") + "</td>";
-                    html += "<td>" + (it.studentName || "") + "</td>";
-                    html += "<td>" + (it.classSection || "") + "</td>";
-                    html += "<td>" + (it.bookNo || "") + "</td>";
-                    html += "<td>" + (it.title || "") + "</td>";
-                    html += "<td>" + (it.issueDate || "") + "</td>";
-                    html += "<td>" + (it.dueDate || "") + "</td>";
-                    html += "</tr>";
-                });
-                html += "</tbody></table>";
-            }
-
-            html += "</body></html>";
-
-            win.document.open();
-            win.document.write(html);
-            win.document.close();
-            win.focus();
-            win.print();
-        }
-
-        function setupTabs() {
-            const buttons = document.querySelectorAll(".tab-btn");
-            const tabs = document.querySelectorAll(".tab-content");
-            buttons.forEach(btn => {
-                btn.addEventListener("click", () => {
-                    buttons.forEach(b => b.classList.remove("active"));
-                    tabs.forEach(t => t.classList.remove("active"));
-                    btn.classList.add("active");
-                    const targetTab = document.getElementById(btn.getAttribute("data-tab"));
-                    targetTab.classList.add("active");
-                    
-                    // Check admin status on tab switch (New Feature)
-                    const isAdminLoggedIn = document.getElementById("adminSection").style.display !== 'none';
-                    if (btn.getAttribute("data-tab") === "reportsTab") {
-                        if (isAdminLoggedIn) {
-                            document.getElementById("reportLoginSection").style.display = "none";
-                            document.getElementById("reportSection").style.display = "block";
-                        } else {
-                            document.getElementById("reportLoginSection").style.display = "block";
-                            document.getElementById("reportSection").style.display = "none";
-                        }
-                    }
-                });
-            });
-        }
-
-        // Modal close handler
-        function setupModalHandler() {
-            const modal = document.getElementById("bookDetailModal");
-            const closeBtn = document.querySelector(".close-btn");
-            
-            closeBtn.addEventListener("click", () => {
-                modal.style.display = "none";
-            });
-            window.addEventListener("click", (event) => {
-                if (event.target === modal) {
-                    modal.style.display = "none";
-                }
-            });
-        }
-
-
-        // Initialization
-        window.addEventListener("DOMContentLoaded", () => {
-            setupTabs();
-            setupAdmin();
-            setupIssueHandler();
-            setupExcelImport();
-            setupStudentImport();
-            setupExportHandlers(); // New Export Setup
-            setupModalHandler(); // New Modal Setup
-            
-            loadExtraBooks();
-            loadIssues();
-            loadStudents();
-            combineBooks();
-            
-            renderBooksTable();
-            renderExtraTable();
-            renderIssuesTable();
-            
-            // Initial Date setup for Issue tab
-            const today = todayStr();
-            const due = addDays(today, 21);
-            const issueDateInput = document.getElementById("issueDate");
-            const dueDateInput = document.getElementById("dueDate");
-            if (issueDateInput) issueDateInput.value = today;
-            if (dueDateInput) dueDateInput.value = due;
-            
-            // Event listeners for filtering
-            document.getElementById("searchText").addEventListener("input", renderBooksTable);
-            document.getElementById("categoryFilter").addEventListener("change", renderBooksTable);
-            document.getElementById("clearFilters").addEventListener("click", () => {
-                document.getElementById("searchText").value = "";
-                document.getElementById("categoryFilter").value = "";
-                renderBooksTable();
-            });
-            document.getElementById("issueSearch").addEventListener("input", renderIssuesTable);
-            
-            // Auto-fill setup
-            setupBookIdAutoFill();
-            setupStudentAutoFillForIssue();
-            
-            // Print button setup
-            document.getElementById("printOverdueBtn").addEventListener("click", printOverdueReport);
-        });
-    </script>
-</body>
-</html>
+            document.getElementById("exportAllBooksBtn").addEventListener
